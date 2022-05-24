@@ -21,29 +21,34 @@ import javax.swing.JPanel;
 public class Panel extends JPanel implements ActionListener{
 
     Button button;
-    Button [] grid = new Button[25];
+    int grid_side;
+    Button [] grid;
     Random r;
     FileWriter fw;
     Panel() throws IOException{
         super();
+        grid_side = 10;
+        int sqr_size = (int) Math.pow(grid_side, 2);
+        grid = new Button[sqr_size];
         r = new Random();
         this.setPreferredSize(new Dimension(500,500));
         this.setBackground(Color.BLACK);
-        this.setLayout(new GridLayout(5,5));
+        this.setLayout(new GridLayout(grid_side,grid_side));
         fw = new FileWriter(new File("res/moves.txt"));
         //System.out.println(System.getProperty("user.dir"));
 
-        for (int i = 0; i < 25; i++) {
+        for (int i = 0; i < sqr_size; i++) {
             button = new Button(this);
+            button.setPreferredSize(new Dimension(500 / grid_side, 500 / grid_side));
             grid[i] = button;
             button.pos = i;
             this.add(button);
-            button.left = (i - 1 < 0 || (i - 1) % 5 == 4) ? null : grid[i - 1];
+            button.left = (i - 1 < 0 || (i - 1) % grid_side == (grid_side - 1)) ? null : grid[i - 1];
             if (button.left != null){
                 button.left.right = button;
             }
             button.right = null;
-            button.up = i - 5 < 0 ? null : grid[i - 5];
+            button.up = i - grid_side < 0 ? null : grid[i - grid_side];
             if(button.up != null){
                 button.up.down = button;
             }
@@ -53,9 +58,10 @@ public class Panel extends JPanel implements ActionListener{
     }
     @Override
     public void actionPerformed(ActionEvent e) {
-        for (int i = 0; i < 25; i++) {
+        int j = (int) Math.pow(grid_side, 2);
+        for (int i = 0; i < j; i++) {
             if (this.grid[i] == e.getSource()){
-                int x = (i / 5) + 1, y = (i % 5) + 1;
+                int x = (i / grid_side) + 1, y = (i % grid_side) + 1;
                 System.out.println(x + "," + y);
                 try {
                     fw.append(x + "," + y + "\n");
@@ -64,7 +70,7 @@ public class Panel extends JPanel implements ActionListener{
                 }
                 Button button = (Button) e.getSource();
                 button.moved = true;
-                if (i == 4){
+                if (i == grid_side-1){
                     button.setBackground(Color.GREEN);
                     JOptionPane.showMessageDialog(this, "You Win", "CONGRATULATIONS", JOptionPane.PLAIN_MESSAGE);
                     try {
