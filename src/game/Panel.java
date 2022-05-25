@@ -21,7 +21,7 @@ import javax.swing.JPanel;
 public class Panel extends JPanel implements ActionListener{
 
     Button button;
-    int grid_side;
+    int grid_side, finish_pos;
     Button [] grid;
     Random r;
     FileWriter fw;
@@ -36,7 +36,8 @@ public class Panel extends JPanel implements ActionListener{
         this.setLayout(new GridLayout(grid_side,grid_side));
         fw = new FileWriter(new File("res/moves.txt"));
         //System.out.println(System.getProperty("user.dir"));
-
+        this.finish_pos = r.nextInt(sqr_size);
+        System.out.println(finish_pos);
         for (int i = 0; i < sqr_size; i++) {
             button = new Button(this);
             button.setPreferredSize(new Dimension(500 / grid_side, 500 / grid_side));
@@ -53,8 +54,13 @@ public class Panel extends JPanel implements ActionListener{
                 button.up.down = button;
             }
             button.down = null;
+            if (i == finish_pos){
+                button.finish = true;
+            }
         }
-        
+        for (Button button : grid) {
+            checkDistance(button);
+        }        
     }
     @Override
     public void actionPerformed(ActionEvent e) {
@@ -70,7 +76,7 @@ public class Panel extends JPanel implements ActionListener{
                 }
                 Button button = (Button) e.getSource();
                 button.moved = true;
-                if (i == grid_side-1){
+                if (i == finish_pos){
                     button.setBackground(Color.GREEN);
                     JOptionPane.showMessageDialog(this, "You Win", "CONGRATULATIONS", JOptionPane.PLAIN_MESSAGE);
                     try {
@@ -82,11 +88,12 @@ public class Panel extends JPanel implements ActionListener{
                 }
                 else{
                     button.setBackground(Color.YELLOW);
-                    try {
+                    distanceMove(button);
+                    /*try {
                         randomMove(button);
                     } catch (IOException e1) {
                         e1.printStackTrace();
-                    }
+                    }*/
                 }
             }
         }
@@ -122,12 +129,39 @@ public class Panel extends JPanel implements ActionListener{
         pressed.doClick();
     }
 
-    public void checkDistance(Button button){
-        try {
-            
-        } catch (Exception e) {
-            //TODO: handle exception
+    public void distanceMove(Button button){
+        ArrayList <Button> dis = new ArrayList<>();
+        if (button.up != null){
+            dis.add(button.up);
         }
+        if (button.down != null){
+            dis.add(button.down);
+        }
+        if (button.left != null){
+            dis.add(button.left);
+        }
+        if (button.right != null){
+            dis.add(button.right);
+        }
+        int min = Integer.MAX_VALUE, x = 0;
+        for (int i = 0; i < dis.size(); i++) {
+            if (dis.get(i).distance <= min){
+                min = dis.get(i).distance;
+                x = i;
+            }
+        }
+
+        dis.get(x).doClick();
     }
 
+    public void checkDistance(Button button){
+        if (button.finish){
+            button.setText(Integer.toString(0));
+        }
+        else {
+            int [] finish = {this.finish_pos / grid_side, this.finish_pos % grid_side};
+            int [] button_pos = {button.pos / grid_side, button.pos % grid_side};
+            button.setText(Integer.toString((Math.abs(finish[0] - button_pos[0]) + Math.abs(finish[1] - button_pos[1]))));
+        }
+    }
 }

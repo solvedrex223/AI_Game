@@ -18,5 +18,6 @@ public class Button extends JButton{
         this.distance = 0;
         this.mapped = false;
         this.moved = false;
+        this.finish = false;
     }
 }
