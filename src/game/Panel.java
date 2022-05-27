@@ -37,7 +37,7 @@ public class Panel extends JPanel implements ActionListener{
         fw = new FileWriter(new File("res/moves.txt"));
         //System.out.println(System.getProperty("user.dir"));
         this.finish_pos = r.nextInt(sqr_size);
-        System.out.println(finish_pos);
+        //System.out.println(finish_pos);
         for (int i = 0; i < sqr_size; i++) {
             button = new Button(this);
             button.setPreferredSize(new Dimension(500 / grid_side, 500 / grid_side));
@@ -161,7 +161,8 @@ public class Panel extends JPanel implements ActionListener{
         else {
             int [] finish = {this.finish_pos / grid_side, this.finish_pos % grid_side};
             int [] button_pos = {button.pos / grid_side, button.pos % grid_side};
-            button.setText(Integer.toString((Math.abs(finish[0] - button_pos[0]) + Math.abs(finish[1] - button_pos[1]))));
+            button.distance = (Math.abs(finish[0] - button_pos[0]) + Math.abs(finish[1] - button_pos[1]));
+            button.setText(Integer.toString(button.distance));
         }
     }
 }
