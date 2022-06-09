@@ -18,20 +18,21 @@ import java.util.Random;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
-public class Panel extends JPanel implements ActionListener{
+public class Panel extends JPanel implements ActionListener,Runnable{
 
     Button button;
     int grid_side, finish_pos;
     Button [] grid;
     Random r;
     FileWriter fw;
+    Thread thread;
     Panel() throws IOException{
         super();
         grid_side = 10;
         int sqr_size = (int) Math.pow(grid_side, 2);
         grid = new Button[sqr_size];
         r = new Random();
-        this.setPreferredSize(new Dimension(500,500));
+        this.setPreferredSize(new Dimension(700,700));
         this.setBackground(Color.BLACK);
         this.setLayout(new GridLayout(grid_side,grid_side));
         fw = new FileWriter(new File("res/moves.txt"));
@@ -56,11 +57,16 @@ public class Panel extends JPanel implements ActionListener{
             button.down = null;
             if (i == finish_pos){
                 button.finish = true;
+                button.distance = 100;
+                button.setBackground(Color.GREEN);
             }
         }
-        for (Button button : grid) {
+        // Commented for exam 1
+        /*for (Button button : grid) {
             checkDistance(button);
-        }        
+        }*/  
+        thread = new Thread(this);
+        exam1();      
     }
     @Override
     public void actionPerformed(ActionEvent e) {
@@ -164,5 +170,102 @@ public class Panel extends JPanel implements ActionListener{
             button.distance = (Math.abs(finish[0] - button_pos[0]) + Math.abs(finish[1] - button_pos[1]));
             button.setText(Integer.toString(button.distance));
         }
+    }
+
+    //Codigo de examen 1
+    public void exam1(){
+        this.setVisible(false);
+        for (int i = 0; i < 100; i++) {
+            startGame();
+            do {
+                randomMoveExam();
+            } while (button.finish != true);
+        }
+        String grid_layout = "[";
+        grid_layout += Integer.toString(button.distance) + ",";
+        for (Button button : grid) {
+            if (button.pos % grid_side == grid_side - 1){
+                grid_layout += Integer.toString(button.distance) + "\n";
+            }
+            else{
+                grid_layout += Integer.toString(button.distance) + ",";
+            }
+        }
+        grid_layout += "]";
+        System.out.println(grid_layout);
+        for (Button button : grid) {
+            button.setText(Integer.toString(button.distance));
+        }
+        this.setVisible(true);
+        startGame();
+        thread.start();
+    }
+
+    public void randomMoveExam(){
+        ArrayList <Button> directions = new ArrayList<>(4);
+        directions.add(button.up);
+        directions.add(button.down);
+        directions.add(button.left);
+        directions.add(button.right);
+        Button random_dir;
+        do{
+            random_dir = directions.get(r.nextInt(4));
+        }
+        while (random_dir == null);
+        button.distance++;
+        button = random_dir;
+    }
+
+    public void startGame(){
+        do{
+            button = grid[r.nextInt((int) Math.pow(grid_side, 2))];
+        }
+        while(button.finish);
+    }
+
+    public void distanceMoveExam(){
+        ArrayList <Button> dis = new ArrayList<>();
+        if (button.up != null){
+            dis.add(button.up);
+        }
+        if (button.down != null){
+            dis.add(button.down);
+        }
+        if (button.left != null){
+            dis.add(button.left);
+        }
+        if (button.right != null){
+            dis.add(button.right);
+        }
+        int min = Integer.MAX_VALUE, x = 0;
+        for (int i = 0; i < dis.size(); i++) {
+            if (dis.get(i).moved){
+                dis.get(i).moved = false;
+            }
+            else{
+                if (dis.get(i).distance <= min){
+                    min = dis.get(i).distance;
+                    x = i;
+                }
+            }
+        }
+        Button tmp = dis.get(x);
+        tmp.setBackground(Color.YELLOW);
+        button.setBackground(Color.WHITE);
+        button.moved = true;
+        button = tmp;
+    }
+    @Override
+    public void run() {
+        do {
+            distanceMoveExam();
+            try {
+                Thread.sleep(500);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        } while (!button.finish);
+        System.out.println("You Win");
+        System.exit(0);     
     }
 }
