@@ -1,6 +1,5 @@
 package game;
 import java.awt.Color;
-import java.awt.Dimension;
 import java.awt.event.ActionListener;
 
 import javax.swing.JButton;
@@ -8,7 +7,7 @@ import javax.swing.JButton;
 public class Button extends JButton{
     
     public int distance,pos;
-    public boolean mapped,moved,finish;
+    public boolean mapped,moved,finish,obstacle;
     public Button up,down,left,right;
 
     Button(ActionListener act){
@@ -19,5 +18,6 @@ public class Button extends JButton{
         this.mapped = false;
         this.moved = false;
         this.finish = false;
+        this.obstacle = false;
     }
 }

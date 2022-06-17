@@ -23,6 +23,7 @@ public class Panel extends JPanel implements ActionListener,Runnable{
     Button button;
     int grid_side, finish_pos;
     Button [] grid;
+    int [] obstacles = {11,12,13,14,46,17,18,28,30,31,33,34,37,38,40,41,43,44,47,48};
     Random r;
     FileWriter fw;
     Thread thread;
@@ -37,7 +38,7 @@ public class Panel extends JPanel implements ActionListener,Runnable{
         this.setLayout(new GridLayout(grid_side,grid_side));
         fw = new FileWriter(new File("res/moves.txt"));
         //System.out.println(System.getProperty("user.dir"));
-        this.finish_pos = r.nextInt(sqr_size);
+        this.finish_pos = 55;
         //System.out.println(finish_pos);
         for (int i = 0; i < sqr_size; i++) {
             button = new Button(this);
@@ -59,6 +60,13 @@ public class Panel extends JPanel implements ActionListener,Runnable{
                 button.finish = true;
                 button.distance = 100;
                 button.setBackground(Color.GREEN);
+            }
+            for (Integer j : obstacles) {
+                if (i == j){
+                    button.setBackground(Color.black);
+                    button.obstacle = true;
+                    break;
+                }
             }
         }
         // Commented for exam 1
@@ -198,6 +206,7 @@ public class Panel extends JPanel implements ActionListener,Runnable{
         }
         this.setVisible(true);
         startGame();
+        button.setBackground(Color.YELLOW);
         thread.start();
     }
 
@@ -211,7 +220,7 @@ public class Panel extends JPanel implements ActionListener,Runnable{
         do{
             random_dir = directions.get(r.nextInt(4));
         }
-        while (random_dir == null);
+        while (random_dir == null || random_dir.obstacle);
         button.distance++;
         button = random_dir;
     }
@@ -220,22 +229,30 @@ public class Panel extends JPanel implements ActionListener,Runnable{
         do{
             button = grid[r.nextInt((int) Math.pow(grid_side, 2))];
         }
-        while(button.finish);
+        while(button.finish || button.obstacle);
     }
 
     public void distanceMoveExam(){
         ArrayList <Button> dis = new ArrayList<>();
         if (button.up != null){
-            dis.add(button.up);
+            if (!button.up.obstacle) {
+                dis.add(button.up);
+            }
         }
         if (button.down != null){
-            dis.add(button.down);
+            if (!button.down.obstacle) {
+                dis.add(button.down);
+            }
         }
         if (button.left != null){
-            dis.add(button.left);
+            if (!button.left.obstacle) {
+                dis.add(button.left);
+            }
         }
         if (button.right != null){
-            dis.add(button.right);
+            if (!button.right.obstacle){
+                dis.add(button.right);
+            } 
         }
         int min = Integer.MAX_VALUE, x = 0;
         for (int i = 0; i < dis.size(); i++) {
@@ -252,6 +269,7 @@ public class Panel extends JPanel implements ActionListener,Runnable{
         Button tmp = dis.get(x);
         tmp.setBackground(Color.YELLOW);
         button.setBackground(Color.WHITE);
+        button.setText(Integer.toString(++button.distance));
         button.moved = true;
         button = tmp;
     }
@@ -260,7 +278,7 @@ public class Panel extends JPanel implements ActionListener,Runnable{
         do {
             distanceMoveExam();
             try {
-                Thread.sleep(500);
+                Thread.sleep(300);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
